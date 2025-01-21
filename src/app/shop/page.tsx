@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { client } from '@/sanity/lib/client';
+import Link from 'next/link';
 
 type Product = {
   _id: string;
@@ -156,12 +157,12 @@ const ProductListingPage = () => {
                     )}
                   </p>
                   <p className="text-gray-500 mb-6">{product.description}</p>
-                  <button
-                    onClick={() => alert(`Product ${product.name} clicked!`)}
+                  <Link href={`/product/${product._id}`}
                     className="bg-blue-600 text-white py-2 px-4 rounded-full block text-center hover:bg-blue-700 transition"
                   >
                     View Product
-                  </button>
+                  
+                    </Link>
                 </div>
               </div>
             ))}
