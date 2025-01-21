@@ -50,7 +50,7 @@ const AboutPage = () => {
             <div className="bg-white p-6 rounded-lg shadow-lg transition-transform transform hover:scale-105">
               <h3 className="text-2xl font-semibold text-gray-800 mb-2">Emily Johnson</h3>
               <p className="text-gray-600">Product Manager</p>
-              <p className="text-gray-500 mt-4">Emily oversees the selection of products, ensuring that we offer a range of high-quality items that cater to our customers' needs.</p>
+              <p className="text-gray-500 mt-4">Emily oversees the selection of products, ensuring that we offer a range of high-quality items that cater to our customers needs.</p>
             </div>
           </div>
         </div>
