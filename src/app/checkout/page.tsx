@@ -60,7 +60,7 @@ const CheckoutPage = () => {
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-r from-blue-100 to-blue-300 py-12 px-6 lg:px-12">
+      <div className="min-h-screen bg-gradient-to-r from-blue-100 to-blue-400 py-12 px-6 lg:px-12">
         <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-8 lg:p-12">
           <h1 className="text-3xl font-bold text-center text-[#1D3178] mb-8">Billing Information</h1>
 
@@ -106,7 +106,7 @@ const CheckoutPage = () => {
               <input
                 required
                 type="tel"
-                pattern="^\d{11,13}$"
+                pattern="^\d{11,14}$"
                 title="Enter a valid phone number"
                 name="phone"
                 id="phone"
@@ -123,7 +123,7 @@ const CheckoutPage = () => {
               </label>
               <input
                 required
-                pattern=".{3,20}"
+                pattern=".{15,40}"
                 title="Enter at least 15 characters"
                 type="text"
                 name="address"
