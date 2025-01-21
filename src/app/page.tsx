@@ -23,8 +23,8 @@ const LandingPage = async () => {
     isFeaturedProduct,
     name,
     price,
-    "imageUrl": image.asset->url
-  }`  );
+    "imageUrl": image.asset->url  
+  }`);
 
   // Filter products to only show those with isFeaturedProduct true
   const featuredProducts = products.filter((product: Product) => product.isFeaturedProduct);
