@@ -78,7 +78,7 @@ const ProductDetailsClient = ({
           You May Like
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {relatedProducts.map((relatedProduct) => (
+          {relatedProducts.slice(0,8).map((relatedProduct) => (
             <div
               key={relatedProduct.id}
               className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-transform transform hover:scale-105"
@@ -97,7 +97,7 @@ const ProductDetailsClient = ({
                   {relatedProduct.name}
                 </h3>
                 <p className="text-[#555555] text-sm mb-4">
-                  {relatedProduct.description.slice(0, 6)}...
+                  {relatedProduct.description.slice(0, 50)}...
                 </p>
                 <p className="text-[#151875] font-semibold mb-4">
                   ${relatedProduct.price}
