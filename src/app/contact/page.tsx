@@ -22,7 +22,7 @@ const ContactPage = () => {
   };
 
   const validateForm = () => {
-    let errors = { name: '', email: '', message: '' };
+    const errors = { name: '', email: '', message: '' };
 
     // Name validation
     if (!formData.name.trim()) {
