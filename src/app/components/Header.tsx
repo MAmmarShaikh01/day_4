@@ -64,6 +64,8 @@ const Header: React.FC = () => {
           <Link href="/shop" className="block py-2 text-gray-600 hover:text-blue-600 transition">Shop</Link>
           <Link href="/about" className="block py-2 text-gray-600 hover:text-blue-600 transition">About</Link>
           <Link href="/contact" className="block py-2 text-gray-600 hover:text-blue-600 transition">Contact</Link>
+          <Link href="/cart" className="block py-2 text-gray-600 hover:text-blue-600 transition">Cart</Link>
+          <Link href="/signup" className="block py-2 text-gray-600 hover:text-blue-600 transition">Sign Up</Link>
         </nav>
       )}
     </header>
