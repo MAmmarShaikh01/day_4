@@ -38,7 +38,7 @@ const ProductDetailsClient = ({
     <div>
       {/* Header Section */}
       <header className="text-center flex justify-center items-center bg-gradient-to-r from-[#F6F5FF] to-[#EAE8FF] mb-12 h-32 sm:h-[286px]">
-        <h1 className="text-3xl sm:text-4xl font-bold text-[#151875]">Product Details</h1>
+        <h1 className="text-3xl sm:text-4xl font-bold text-blue-600">Product Details</h1>
       </header>
 
       {/* Product Details Section */}
@@ -56,7 +56,7 @@ const ProductDetailsClient = ({
 
         {/* Product Info */}
         <div className="flex flex-col w-full md:w-1/2 gap-6 justify-center">
-          <h1 className="text-2xl sm:text-3xl font-bold text-[#151875]">{product.name}</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-blue-600">{product.name}</h1>
           <p className="text-[#555555] text-sm sm:text-base leading-relaxed">
             {product.description}
           </p>
@@ -64,7 +64,7 @@ const ProductDetailsClient = ({
             Price: ${product.price}
           </p>
           <button
-            className="px-4 sm:px-6 py-2 sm:py-3 bg-[#FB2E86] text-white text-sm sm:text-lg rounded-lg hover:bg-[#FB2f98] transition duration-300"
+            className="px-4 sm:px-6 py-2 sm:py-3 bg-blue-600 text-white text-sm sm:text-lg rounded-lg hover:bg-blue700 transition duration-300"
             onClick={() => addToCart(product.id)}
           >
             Add to Cart
@@ -103,7 +103,7 @@ const ProductDetailsClient = ({
                   ${relatedProduct.price}
                 </p>
                 <button
-                  className="px-4 py-2 bg-[#FB2E86] text-white rounded-lg hover:bg-[#FB2f98] transition duration-300"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300"
                   onClick={() => addToCart(relatedProduct.id)}
                 >
                   Add to Cart
