@@ -123,7 +123,7 @@ const CheckoutPage = () => {
               </label>
               <input
                 required
-                pattern=".{15,40}"
+                pattern=".{15,}"
                 title="Enter at least 15 characters"
                 type="text"
                 name="address"
