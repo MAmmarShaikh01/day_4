@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { client } from "@/sanity/lib/client";
+import { useRouter } from "next/navigation";
 
 const SignUpPage = () => {
   const [formData, setFormData] = useState({
@@ -18,6 +19,9 @@ const SignUpPage = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [showLoginButton, setShowLoginButton] = useState(false);
+
+  const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -31,6 +35,7 @@ const SignUpPage = () => {
     e.preventDefault();
     setIsLoading(true);
     setMessage("");
+    setShowLoginButton(false);
 
     const { name, email, password, mobileNumber, street, city, state, country, postalCode } =
       formData;
@@ -44,6 +49,7 @@ const SignUpPage = () => {
 
       if (existingUser) {
         setMessage("Email is already registered. Please log in.");
+        setShowLoginButton(true);
         setIsLoading(false);
         return;
       }
@@ -67,12 +73,9 @@ const SignUpPage = () => {
         },
         isVerified: false,
         role: "user",
-        // createdAt: new Date().toISOString(),
-        // updatedAt: new Date().toISOString(),
       };
 
-      const res = await client.create(newUser);
-      console.log(res+ " created user")
+      await client.create(newUser);
       setMessage("User signed up successfully!");
     } catch (error) {
       console.error("Error creating user:", error);
@@ -108,6 +111,14 @@ const SignUpPage = () => {
           </button>
         </form>
         {message && <p className="text-center text-red-500 mt-4">{message}</p>}
+        {showLoginButton && (
+          <button
+            onClick={() => router.push("/login")} // Update the route to your login page
+            className="w-full bg-green-600 text-white py-3 rounded mt-4 hover:bg-green-700 transition"
+          >
+            Go to Login
+          </button>
+        )}
       </div>
     </div>
   );
