@@ -130,7 +130,7 @@ const SignUpPage = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="bg-white shadow-lg rounded-lg p-8 max-w-md w-full">
-          <h2 className="text-2xl font-bold text-center mb-6">You're Signed Up!</h2>
+          <h2 className="text-2xl font-bold text-center mb-6">You&rsquo;re Signed Up!</h2>
           <p className="mb-2"><strong>Name:</strong> {savedUser.name}</p>
           <p className="mb-2"><strong>Email:</strong> {savedUser.email}</p>
           <p className="mb-2"><strong>Mobile Number:</strong> {savedUser.mobileNumber}</p>
