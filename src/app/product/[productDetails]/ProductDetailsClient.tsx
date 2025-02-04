@@ -27,8 +27,10 @@ const ProductDetailsClient = ({
   relatedProducts: Product1[];
 }) => {
   const [showSignInModal, setShowSignInModal] = useState(false);
+  const [showCartPopup, setShowCartPopup] = useState(false);
+  const [cartPopupMessage, setCartPopupMessage] = useState("");
 
-  // Add to Cart function
+  // Add to Cart function with beautiful popup feedback
   const addToCart = (id: string) => {
     // Check if user is signed in by verifying if "user" exists in local storage.
     const user = localStorage.getItem("user");
@@ -43,18 +45,21 @@ const ProductDetailsClient = ({
       if (!existingCart.includes(id)) {
         existingCart.push(id);
         localStorage.setItem("cartItems", JSON.stringify(existingCart));
-        alert("Item added to cart!");
+        setCartPopupMessage("Item added to cart!");
       } else {
-        alert("Item already in the cart.");
+        setCartPopupMessage("Item already in the cart.");
       }
+      setShowCartPopup(true);
     } catch (error) {
       console.error("Failed to add item to cart:", error);
+      setCartPopupMessage("An error occurred. Please try again.");
+      setShowCartPopup(true);
     }
   };
 
   return (
     <div>
-      {/* Beautiful Sign-In Modal */}
+      {/* Sign-In Popup Modal */}
       {showSignInModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50">
           <div className="relative bg-gradient-to-br from-purple-400 to-blue-500 p-8 rounded-xl shadow-2xl text-center max-w-sm mx-4">
@@ -71,6 +76,23 @@ const ProductDetailsClient = ({
             <button
               onClick={() => setShowSignInModal(false)}
               className="mt-4 px-6 py-2 bg-white text-blue-600 font-semibold rounded-full shadow-md hover:bg-gray-100 transition-transform transform hover:scale-105"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Cart Popup Modal */}
+      {showCartPopup && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
+          <div className="bg-blue-700 p-6 rounded-xl shadow-2xl text-center max-w-xs mx-4 transform transition-all hover:scale-105">
+            <p className="text-white text-lg font-semibold mb-4">
+              {cartPopupMessage}
+            </p>
+            <button
+              onClick={() => setShowCartPopup(false)}
+              className="mt-2 px-4 py-2 bg-white text-blue-500 font-semibold rounded-full shadow-md hover:bg-gray-100 transition-transform transform hover:scale-110"
             >
               Close
             </button>
