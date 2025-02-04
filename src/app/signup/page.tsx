@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { client } from "@/sanity/lib/client";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 interface UserData {
   name: string;
@@ -137,8 +138,12 @@ const SignUpPage = () => {
           <div className="mb-2">
             <strong>Address:</strong>
             <p>{savedUser.address.street}</p>
-            <p>{savedUser.address.city}, {savedUser.address.state}</p>
-            <p>{savedUser.address.country} - {savedUser.address.postalCode}</p>
+            <p>
+              {savedUser.address.city}, {savedUser.address.state}
+            </p>
+            <p>
+              {savedUser.address.country} - {savedUser.address.postalCode}
+            </p>
           </div>
           <button
             onClick={() => router.push("/")}
@@ -151,7 +156,7 @@ const SignUpPage = () => {
     );
   }
 
-  // Otherwise, render the signup form
+  // Otherwise, render the signup form along with the "Already have an account? Login" text.
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white shadow-lg rounded-lg p-8 max-w-md w-full">
@@ -192,6 +197,12 @@ const SignUpPage = () => {
             Go to Login
           </button>
         )}
+        <p className="mt-4 text-center">
+          Already have an account?{" "}
+          <Link href="/login" className="text-blue-600 hover:underline">
+            Login
+          </Link>
+        </p>
       </div>
     </div>
   );
