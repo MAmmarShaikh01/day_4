@@ -111,9 +111,9 @@ const Header: React.FC = () => {
         {/* Icons */}
         <div className="hidden md:flex items-center space-x-4 text-gray-600">
           <Link href="/cart" className="hover:text-blue-600 transition">
-            <FaShoppingCart size={20} />
+            <FaShoppingCart size={20} /> 
           </Link>
-          <Link href="/profile" className="hover:text-blue-600 transition">
+          <Link href="/signup" className="hover:text-blue-600 transition">
             <FaUser size={20} />
           </Link>
         </div>
