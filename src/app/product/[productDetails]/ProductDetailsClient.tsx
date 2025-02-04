@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -26,8 +26,18 @@ const ProductDetailsClient = ({
   product: Product;
   relatedProducts: Product1[];
 }) => {
+  const [showSignInModal, setShowSignInModal] = useState(false);
+
   // Add to Cart function
   const addToCart = (id: string) => {
+    // Check if user is signed in by verifying if "user" exists in local storage.
+    const user = localStorage.getItem("user");
+    if (!user) {
+      // If no user is found, show the sign in modal.
+      setShowSignInModal(true);
+      return;
+    }
+
     try {
       const existingCart = JSON.parse(localStorage.getItem("cartItems") || "[]");
       if (!existingCart.includes(id)) {
@@ -44,6 +54,30 @@ const ProductDetailsClient = ({
 
   return (
     <div>
+      {/* Beautiful Sign-In Modal */}
+      {showSignInModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50">
+          <div className="relative bg-gradient-to-br from-purple-400 to-blue-500 p-8 rounded-xl shadow-2xl text-center max-w-sm mx-4">
+            <h2 className="text-2xl font-bold text-white mb-4">Sign In Required</h2>
+            <p className="text-white mb-6">
+              Please{" "}
+              <Link href="/signup">
+                <span className="font-semibold text-yellow-300 hover:text-yellow-400 transition-colors cursor-pointer underline">
+                  Sign Up
+                </span>
+              </Link>{" "}
+              first.
+            </p>
+            <button
+              onClick={() => setShowSignInModal(false)}
+              className="mt-4 px-6 py-2 bg-white text-blue-600 font-semibold rounded-full shadow-md hover:bg-gray-100 transition-transform transform hover:scale-105"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Header Section */}
       <header className="text-center flex justify-center items-center bg-gradient-to-r from-[#F6F5FF] to-[#EAE8FF] mb-12 h-32 sm:h-[286px]">
         <h1 className="text-3xl sm:text-4xl font-bold text-blue-600">Product Details</h1>
@@ -72,7 +106,7 @@ const ProductDetailsClient = ({
             Price: ${product.price}
           </p>
           <button
-            className="px-4 sm:px-6 py-2 sm:py-3 bg-blue-600 text-white text-sm sm:text-lg rounded-lg hover:bg-blue700 transition duration-300"
+            className="px-4 sm:px-6 py-2 sm:py-3 bg-blue-600 text-white text-sm sm:text-lg rounded-lg hover:bg-blue-700 transition duration-300"
             onClick={() => addToCart(product.id)}
           >
             Add to Cart
@@ -86,7 +120,7 @@ const ProductDetailsClient = ({
           You May Like
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {relatedProducts.slice(0,8).map((relatedProduct) => (
+          {relatedProducts.slice(0, 8).map((relatedProduct) => (
             <div
               key={relatedProduct._id}
               className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-transform transform hover:scale-105"
@@ -111,12 +145,9 @@ const ProductDetailsClient = ({
                   ${relatedProduct.price}
                 </p>
                 <Link href={`/product/${relatedProduct._id}`}>
-                <button
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300"
-                  
-                >
-                  Show Product
-                </button>
+                  <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300">
+                    Show Product
+                  </button>
                 </Link>
               </div>
             </div>
