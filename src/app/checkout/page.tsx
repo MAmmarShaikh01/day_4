@@ -2,6 +2,9 @@
 
 import { useRouter } from "next/navigation"; // Use this for navigation
 import React, { useState, useEffect } from "react";
+// import {Elements} from "@stripe/react-stripe-js" 
+// import {loadStripe} from "@stripe/stripe-js" 
+
 
 interface FormData {
   fullName: string;
