@@ -38,6 +38,7 @@ interface OrderData {
   paymentStatus: "paid" | "cash on delivery";
   amount: number;
   createdAt: string;
+  cartItems: number[];
 }
 
 const CheckoutForm = () => {
@@ -145,8 +146,12 @@ const CheckoutForm = () => {
     const amountStored = localStorage.getItem("totalAmount");
     const amountValue = amountStored ? Number(amountStored) : 0;
 
+    // Retrieve cart items from localStorage (assumed to be stored as a JSON array of numbers).
+    const cartItemsString = localStorage.getItem("cartItems");
+    const cartItems: number[] = cartItemsString ? JSON.parse(cartItemsString) : [];
+
     if (formData.paymentMethod === "cash") {
-      // Build order data with paymentStatus "cash on delivery"
+      // For Cash on Delivery, build order data with paymentStatus "cash on delivery".
       const orderData: OrderData = {
         _type: "order",
         fullName: formData.fullName,
@@ -160,6 +165,7 @@ const CheckoutForm = () => {
         paymentStatus: "cash on delivery",
         amount: amountValue,
         createdAt: new Date().toISOString(),
+        cartItems: cartItems,
       };
 
       await submitOrderToSanity(orderData);
@@ -237,6 +243,7 @@ const CheckoutForm = () => {
         paymentStatus: "paid",
         amount: amountValue,
         createdAt: new Date().toISOString(),
+        cartItems: cartItems,
       };
 
       await submitOrderToSanity(orderData);

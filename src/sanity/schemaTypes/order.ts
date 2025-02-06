@@ -70,6 +70,12 @@ export default {
         title: 'Created At',
         type: 'datetime',
       },
+      {
+        name: 'cartItems',
+        title: 'Cart Items',
+        type: 'array',
+        of: [{ type: 'number' }],
+      },
     ],
   };
   
