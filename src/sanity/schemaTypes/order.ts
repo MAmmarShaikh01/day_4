@@ -74,7 +74,7 @@ export default {
         name: 'cartItems',
         title: 'Cart Items',
         type: 'array',
-        of: [{ type: 'number' }],
+        of: [{ type: 'string' }],
       },
     ],
   };

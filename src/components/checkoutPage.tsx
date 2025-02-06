@@ -38,7 +38,7 @@ interface OrderData {
   paymentStatus: "paid" | "cash on delivery";
   amount: number;
   createdAt: string;
-  cartItems: number[];
+  cartItems: string[];
 }
 
 const CheckoutForm = () => {
@@ -146,9 +146,9 @@ const CheckoutForm = () => {
     const amountStored = localStorage.getItem("totalAmount");
     const amountValue = amountStored ? Number(amountStored) : 0;
 
-    // Retrieve cart items from localStorage (assumed to be stored as a JSON array of numbers).
+    // Retrieve cart items from localStorage (assumed to be stored as a JSON array of strings).
     const cartItemsString = localStorage.getItem("cartItems");
-    const cartItems: number[] = cartItemsString ? JSON.parse(cartItemsString) : [];
+    const cartItems: string[] = cartItemsString ? JSON.parse(cartItemsString) : [];
 
     if (formData.paymentMethod === "cash") {
       // For Cash on Delivery, build order data with paymentStatus "cash on delivery".
@@ -212,7 +212,7 @@ const CheckoutForm = () => {
         return;
       }
 
-      // Build return URL.
+      // Build return URL for payment success.
       const proto = window.location.protocol;
       const host = window.location.host;
       const returnUrl = `${proto}//${host}/ordercompleted`;
@@ -247,7 +247,8 @@ const CheckoutForm = () => {
       };
 
       await submitOrderToSanity(orderData);
-      // Stripe will automatically redirect on success.
+      // After successful payment and order submission, redirect to the order completed page.
+      router.push("/ordercompleted");
       setLoading(false);
     }
   };
