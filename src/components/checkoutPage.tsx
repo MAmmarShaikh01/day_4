@@ -25,6 +25,21 @@ interface FormData {
   paymentMethod: "creditCard" | "cash";
 }
 
+interface OrderData {
+  _type: "order";
+  fullName: string;
+  email: string;
+  phone: string;
+  address: string;
+  city: string;
+  postalCode: string;
+  country: string;
+  paymentMethod: "creditCard" | "cash";
+  paymentStatus: "paid" | "cash on delivery";
+  amount: number;
+  createdAt: string;
+}
+
 const CheckoutForm = () => {
   const router = useRouter();
   const stripe = useStripe();
@@ -109,12 +124,12 @@ const CheckoutForm = () => {
     }
   }, [formData.paymentMethod]);
 
-  // Helper function to submit order to Sanity.
-  const submitOrderToSanity = async (orderData: any) => {
+  // Helper function to submit order data to Sanity.
+  const submitOrderToSanity = async (orderData: OrderData): Promise<void> => {
     try {
       await client.create(orderData);
     } catch (error) {
-      console.error("Error submitting order to Sanity1:", error);
+      console.error("Error submitting order to Sanity:", error);
     }
   };
 
@@ -131,8 +146,8 @@ const CheckoutForm = () => {
     const amountValue = amountStored ? Number(amountStored) : 0;
 
     if (formData.paymentMethod === "cash") {
-      // For Cash on Delivery, build order data with paymentStatus "cash on delivery"
-      const orderData = {
+      // Build order data with paymentStatus "cash on delivery"
+      const orderData: OrderData = {
         _type: "order",
         fullName: formData.fullName,
         email: formData.email,
@@ -147,7 +162,6 @@ const CheckoutForm = () => {
         createdAt: new Date().toISOString(),
       };
 
-      // Submit order data to Sanity.
       await submitOrderToSanity(orderData);
       alert("Order Placed Successfully! (Cash on Delivery)");
       router.push("/ordercompleted");
@@ -210,7 +224,7 @@ const CheckoutForm = () => {
       }
 
       // After successful payment, build order data with paymentStatus "paid".
-      const orderData = {
+      const orderData: OrderData = {
         _type: "order",
         fullName: formData.fullName,
         email: formData.email,
