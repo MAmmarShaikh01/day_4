@@ -1,136 +1,351 @@
-// Enable client-side rendering in Next.js (client components).
 "use client";
 
-// Import React and necessary hooks and components from the React and Stripe libraries.
-import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import React, { useState, useEffect } from "react";
 import {
+  CardNumberElement,
+  CardExpiryElement,
+  CardCvcElement,
   useStripe,
   useElements,
-  PaymentElement,
 } from "@stripe/react-stripe-js";
 
-// Import a custom helper function to convert the amount to a sub currency (e.g., cents).
-import convertToSubcurrency from "../lib/convertToSubcurrency";
+// Simple function to convert dollars to cents.
+const convertToSubcurrency = (amount: number): number => Math.round(amount * 100);
 
-// Define the CheckoutPage component, which receives an 'amount' prop.
-const CheckoutPage = ({ amount }: { amount: number }) => {
-  // Initialize the Stripe instance using the useStripe hook.
+interface FormData {
+  fullName: string;
+  email: string;
+  phone: string;
+  address: string;
+  city: string;
+  postalCode: string;
+  country: string;
+  paymentMethod: "creditCard" | "cash";
+}
+
+const CheckoutForm = () => {
+  const router = useRouter();
   const stripe = useStripe();
-  
-  // Initialize the Stripe Elements instance using the useElements hook.
   const elements = useElements();
-  
-  // useState hook to manage error messages.
-  const [errorMessage, setErrorMessage] = useState<string>();
-  
-  // useState hook to store the client secret needed for the payment.
-  const [clientSecret, setClientSecret] = useState("");
-  
-  // useState hook to track whether a payment is processing.
-  const [loading, setLoading] = useState(false);
 
-  // useEffect hook to create a PaymentIntent on the server as soon as the component mounts or 'amount' changes.
+  const [formData, setFormData] = useState<FormData>({
+    fullName: "",
+    email: "",
+    phone: "",
+    address: "",
+    city: "",
+    postalCode: "",
+    country: "",
+    paymentMethod: "creditCard",
+  });
+  const [isFormValid, setIsFormValid] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+  const [clientSecret, setClientSecret] = useState<string>("");
+
+  // Pre-fill user details from localStorage, if available.
   useEffect(() => {
-    // Call our API to create a PaymentIntent with the given amount.
-    fetch("/api/create-payment-intent", {
-      method: "POST", // Make a POST request to the API.
-      headers: {
-        "Content-Type": "application/json", // Specify that we're sending JSON.
-      },
-      // Convert the amount to subcurrency (e.g., cents) before sending to the server.
-      body: JSON.stringify({ amount: convertToSubcurrency(amount) }),
-    })
-      // Parse the JSON response.
-      .then((res) => {console.log(res.json); return res.json()})
-      // Extract the clientSecret from the response and update state.
-      .then((data) => {console.log(data.clientSecret); return setClientSecret(data.clientSecret)});
-  }, [amount]); // Re-run this effect if 'amount' changes.
-
-  // Event handler for form submission (payment confirmation).
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    // Prevent the default form submission behavior (page reload).
-    event.preventDefault();
-    
-    // Indicate that the payment process is loading.
-    setLoading(true);
-
-    // If Stripe or Elements haven't initialized yet, exit early.
-    if (!stripe || !elements) {
-      return;
+    if (typeof window !== "undefined") {
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        try {
+          const parsedUser = JSON.parse(storedUser);
+          setFormData({
+            fullName: parsedUser.name || "",
+            email: parsedUser.email || "",
+            phone: parsedUser.mobileNumber || "",
+            address: parsedUser.address?.street || "",
+            city: parsedUser.address?.city || "",
+            postalCode: parsedUser.address?.postalCode || "",
+            country: parsedUser.address?.country || "",
+            paymentMethod: "creditCard",
+          });
+        } catch (error) {
+          console.error("Error parsing user data:", error);
+        }
+      }
     }
+  }, []);
 
-    // Ask Stripe Elements to validate the card details or other payment elements.
-    const { error: submitError } = await elements.submit();
+  // Validate form fields.
+  useEffect(() => {
+    const valid =
+      formData.fullName.trim() !== "" &&
+      formData.email.trim() !== "" &&
+      formData.phone.trim() !== "" &&
+      formData.address.trim() !== "" &&
+      formData.city.trim() !== "" &&
+      formData.postalCode.trim() !== "" &&
+      formData.country.trim() !== "";
+    setIsFormValid(valid);
+  }, [formData]);
 
-    // If there's an error during the Elements submission, display it and reset loading.
-    if (submitError) {
-      setErrorMessage(submitError.message);
-      setLoading(false);
-      return;
-    }
-    const proto = window.location.protocol
-    const pathn = window.location.host;
-    console.log(`${proto}//${pathn}`)
-    // Confirm the payment on the server using Stripe.
-    const { error } = await stripe.confirmPayment({
-      elements,              // The Stripe Elements instance with the payment details.
-      clientSecret,          // The client secret returned by the PaymentIntent creation.
-      confirmParams: {
-        // After payment completes successfully, the user will be redirected here.
-        return_url: `${proto}//${pathn}/payment-success?amount=${amount}`,
-      },
-    });
-
-    // If there's an immediate error during payment confirmation, set it in state.
-    if (error) {
-      // e.g., card details incomplete or invalid.
-      setErrorMessage(error.message);
-    } else {
-      // No immediate error. The UI will handle showing a success message.
-      // The user will then be redirected to the return URL set above.
-    }
-
-    // Reset the loading state after processing.
-    setLoading(false);
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // If the clientSecret, stripe, or elements aren't ready, show a loading spinner.
-  if (!clientSecret || !stripe || !elements) {
-    return (
-      <div className="flex items-center justify-center">
-        <div
-          className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-white"
-          role="status"
-        >
-          <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
-            Loading...
-          </span>
+  // When Credit Card is selected, fetch PaymentIntent clientSecret.
+  useEffect(() => {
+    if (formData.paymentMethod === "creditCard") {
+      // Assume the total amount is stored in localStorage (e.g., from your cart).
+      const amount = localStorage.getItem("totalAmount");
+      if (amount) {
+        fetch("/api/create-payment-intent", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ amount: convertToSubcurrency(Number(amount)) }),
+        })
+          .then((res) => res.json())
+          .then((data) => setClientSecret(data.clientSecret))
+          .catch((error) => {
+            console.error("Error creating PaymentIntent:", error);
+            setErrorMessage("Failed to initiate payment.");
+          });
+      }
+    }
+  }, [formData.paymentMethod]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMessage("");
+    if (!isFormValid) {
+      alert("Please fill in all required fields.");
+      return;
+    }
+
+    if (formData.paymentMethod === "cash") {
+      alert("Order Placed Successfully! (Cash on Delivery)");
+      router.push("/ordercompleted");
+      return;
+    }
+
+    if (formData.paymentMethod === "creditCard") {
+      setLoading(true);
+      if (!stripe || !elements) {
+        setErrorMessage("Stripe is not loaded yet.");
+        setLoading(false);
+        return;
+      }
+
+      const cardNumberElement = elements.getElement(CardNumberElement);
+      if (!cardNumberElement) {
+        setErrorMessage("Card details are incomplete.");
+        setLoading(false);
+        return;
+      }
+
+      // Create PaymentMethod using the card fields.
+      const { error: pmError, paymentMethod } = await stripe.createPaymentMethod({
+        type: "card",
+        card: cardNumberElement,
+        billing_details: {
+          name: formData.fullName,
+          email: formData.email,
+          phone: formData.phone,
+          address: {
+            line1: formData.address,
+            city: formData.city,
+            postal_code: formData.postalCode,
+            country: formData.country,
+          },
+        },
+      });
+
+      if (pmError || !paymentMethod) {
+        setErrorMessage(pmError?.message || "Failed to create payment method.");
+        setLoading(false);
+        return;
+      }
+
+      // Dynamically build the return URL.
+      const proto = window.location.protocol;
+      const host = window.location.host;
+      const returnUrl = `${proto}//${host}/payment-success?amount=${localStorage.getItem("totalAmount")}`;
+
+      // Confirm the PaymentIntent.
+      const { error: confirmError } = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: paymentMethod.id,
+        return_url: returnUrl,
+      });
+
+      if (confirmError) {
+        setErrorMessage(confirmError.message || "Payment confirmation failed.");
+        setLoading(false);
+        return;
+      }
+      // Stripe will handle redirection on success.
+      setLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-xl border border-blue-100 transition hover:shadow-2xl">
+      <h1 className="text-3xl font-bold text-center text-blue-700 mb-6">Billing Information</h1>
+
+      {/* User Details */}
+      <div className="grid grid-cols-1 gap-6">
+        <div>
+          <label className="block text-sm font-semibold text-gray-700">Full Name</label>
+          <input
+            type="text"
+            name="fullName"
+            required
+            value={formData.fullName}
+            onChange={handleInputChange}
+            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-600 transition duration-200"
+            placeholder="Enter your full name"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-semibold text-gray-700">Email</label>
+          <input
+            type="email"
+            name="email"
+            required
+            value={formData.email}
+            onChange={handleInputChange}
+            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-600 transition duration-200"
+            placeholder="Enter your email"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-semibold text-gray-700">Phone</label>
+          <input
+            type="tel"
+            name="phone"
+            required
+            value={formData.phone}
+            onChange={handleInputChange}
+            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-600 transition duration-200"
+            placeholder="Enter your phone number"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-semibold text-gray-700">Address</label>
+          <input
+            type="text"
+            name="address"
+            required
+            value={formData.address}
+            onChange={handleInputChange}
+            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-600 transition duration-200"
+            placeholder="Enter your address"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-semibold text-gray-700">City</label>
+          <input
+            type="text"
+            name="city"
+            required
+            value={formData.city}
+            onChange={handleInputChange}
+            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-600 transition duration-200"
+            placeholder="Enter your city"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-semibold text-gray-700">Postal Code</label>
+          <input
+            type="text"
+            name="postalCode"
+            required
+            value={formData.postalCode}
+            onChange={handleInputChange}
+            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-600 transition duration-200"
+            placeholder="Enter your postal code"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-semibold text-gray-700">Country</label>
+          <input
+            type="text"
+            name="country"
+            required
+            value={formData.country}
+            onChange={handleInputChange}
+            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-600 transition duration-200"
+            placeholder="Enter your country"
+          />
         </div>
       </div>
-    );
-  }
 
-  // Return the checkout form once everything is ready.
-  return (
-    // Attach the handleSubmit event handler to the form.
-    <form onSubmit={handleSubmit} className="bg-white p-2 rounded-md">
-      {/* If the client secret is available, render the Stripe PaymentElement. */}
-      {clientSecret && <PaymentElement />}
+      {/* Payment Method Selection */}
+      <div className="mt-6">
+        <label className="block text-sm font-semibold text-gray-700">Payment Method</label>
+        <select
+          name="paymentMethod"
+          value={formData.paymentMethod}
+          onChange={handleInputChange}
+          className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-600 transition duration-200"
+          required
+        >
+          <option value="creditCard">Credit Card</option>
+          <option value="cash">Cash on Delivery</option>
+        </select>
+      </div>
 
-      {/* Display any error messages returned from Stripe or the submission process. */}
-      {errorMessage && <div>{errorMessage}</div>}
+      {/* Conditional Credit Card Fields */}
+      {formData.paymentMethod === "creditCard" && (
+        <div className="mt-6 space-y-4">
+          <h2 className="text-xl font-bold text-blue-700">Credit Card Details</h2>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Card Number</label>
+            <CardNumberElement
+              className="p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-600 transition duration-200"
+              options={{
+                style: {
+                  base: { fontSize: "16px", color: "#424770", "::placeholder": { color: "#aab7c4" } },
+                },
+              }}
+            />
+          </div>
+          <div className="flex space-x-4">
+            <div className="w-1/2">
+              <label className="block text-sm font-medium text-gray-700">Expiration Date</label>
+              <CardExpiryElement
+                className="p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-600 transition duration-200"
+                options={{
+                  style: {
+                    base: { fontSize: "16px", color: "#424770", "::placeholder": { color: "#aab7c4" } },
+                  },
+                }}
+              />
+            </div>
+            <div className="w-1/2">
+              <label className="block text-sm font-medium text-gray-700">CVC/CVV</label>
+              <CardCvcElement
+                className="p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-600 transition duration-200"
+                options={{
+                  style: {
+                    base: { fontSize: "16px", color: "#424770", "::placeholder": { color: "#aab7c4" } },
+                  },
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
-      {/* The payment button, disabled if Stripe isn't ready or if we're loading. */}
+      {errorMessage && <div className="mt-4 text-red-500">{errorMessage}</div>}
+
       <button
-        disabled={!stripe || loading}
-        className="text-white w-full p-5 bg-black mt-2 rounded-md font-bold disabled:opacity-50 disabled:animate-pulse"
+        type="submit"
+        disabled={!isFormValid || loading}
+        className={`mt-6 w-full py-3 text-white rounded-md font-bold transition duration-300 ${
+          isFormValid && !loading
+            ? "bg-blue-600 hover:bg-blue-700 hover:shadow-lg"
+            : "bg-gray-400 cursor-not-allowed"
+        }`}
       >
-        {/* If we're not loading, show the pay amount; otherwise, show a processing message. */}
-        {!loading ? `Pay $${amount}` : "Processing..."}
+        {loading ? "Processing..." : "Place Order"}
       </button>
     </form>
   );
 };
 
-// Export the CheckoutPage component as the default export.
-export default CheckoutPage;
+export default CheckoutForm;
