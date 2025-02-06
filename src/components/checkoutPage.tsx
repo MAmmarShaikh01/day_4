@@ -68,14 +68,16 @@ const CheckoutPage = ({ amount }: { amount: number }) => {
       setLoading(false);
       return;
     }
-
+    const proto = window.location.protocol
+    const pathn = window.location.host;
+    console.log(`${proto}//${pathn}`)
     // Confirm the payment on the server using Stripe.
     const { error } = await stripe.confirmPayment({
       elements,              // The Stripe Elements instance with the payment details.
       clientSecret,          // The client secret returned by the PaymentIntent creation.
       confirmParams: {
         // After payment completes successfully, the user will be redirected here.
-        return_url: `http://www.localhost:3000/payment-success?amount=${amount}`,
+        return_url: `${proto}//${pathn}/payment-success?amount=${amount}`,
       },
     });
 
