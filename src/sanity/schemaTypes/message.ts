@@ -40,7 +40,13 @@ export default {
         calendarTodayLabel: 'Today',
       },
       initialValue: () => new Date().toISOString(),
-      // validation: (Rule: Rule) => Rule.required(),
+    },
+    {
+      name: 'pinned',
+      title: 'Pinned',
+      type: 'boolean',
+      description: 'If true, this message is pinned to the top (only admin can change this)',
+      initialValue: false,
     },
   ],
 };
