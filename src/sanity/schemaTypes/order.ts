@@ -88,7 +88,7 @@ export default {
       name: 'cartItems',
       title: 'Cart Items',
       type: 'array',
-      of: [{ type: 'reference', to: [{ type: 'product' }] }],
+      of: [{ type: 'string' }],
     },
   ],
 };
