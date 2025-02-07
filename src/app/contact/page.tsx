@@ -14,15 +14,7 @@ const ContactPage = () => {
     email: '',
     message: '',
   });
-  const sendDataToSanity = async()=>{
-    await client.create({
-      _type: "message",
-      name: formData.name,
-      email: formData.email,
-      message: formData.message,
-      // createdAt is automatically set by the schema's initialValue
-    });
-  }
+
   // State to control the modal popup for submission confirmation
   const [showModal, setShowModal] = useState(false);
 
@@ -70,6 +62,17 @@ const ContactPage = () => {
 
     setFormErrors(errors);
     return !Object.values(errors).some((error) => error !== '');
+  };
+
+  // Updated sendDataToSanity to include current time explicitly.
+  const sendDataToSanity = async () => {
+    await client.create({
+      _type: "message",
+      name: formData.name,
+      email: formData.email,
+      message: formData.message,
+      createdAt: new Date().toISOString(), // explicitly sending current time
+    });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
